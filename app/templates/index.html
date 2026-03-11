@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日文文本识别</title>
+    <link href="{% static 'bootstrap-3.4.1-dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+        .panel {
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .panel:hover {
+            transform: translateY(-5px);
+        }
+        .panel-heading {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            font-weight: bold;
+            padding: 15px;
+        }
+        .panel-body {
+            padding: 30px;
+            background: white;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .form-control {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(79, 172, 254, 0.4);
+        }
+        #preview-container {
+            margin-top: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        #preview-container img {
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            cursor: pointer;
+            display: block;
+        }
+        .file-input-label {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .file-input-label:hover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+        }
+        .file-input-label i {
+            font-size: 30px;
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">日文文本识别</h1>
+        <div class="row">
+            <div class="container">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5 class="panel-title">上传图片</h5>
+                    </div>
+                    <div class="panel-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="image">选择包含日文文本的图片</label>
+                                <div class="file-input-wrapper">
+                                    <input type="file" class="form-control" id="image" name="image" accept="image/*" required onchange="previewImage(this)">
+                                    <div class="file-input-label">
+                                        <i class="glyphicon glyphicon-cloud-upload"></i>
+                                        <p>点击或拖拽文件到此处上传</p>
+                                        <p class="text-muted small">支持 JPG、PNG、GIF 等图片格式</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="glyphicon glyphicon-search"></i> 上传识别
+                            </button>
+                        </form>
+                        <div id="preview-container" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'bootstrap-3.4.1-dist/js/bootstrap.min.js' %}"></script>
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var previewContainer = document.getElementById('preview-container');
+                    previewContainer.style.display = 'block';
+                    previewContainer.innerHTML = '';
+                    
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'img-responsive';
+                    img.alt = '预览图片';
+                    
+                    previewContainer.appendChild(img);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // 添加拖拽功能
+        var dropZone = document.querySelector('.file-input-label');
+        var fileInput = document.getElementById('image');
+        
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.style.borderColor = '#4facfe';
+            dropZone.style.background = '#f0f8ff';
+        });
+        
+        dropZone.addEventListener('dragleave', function() {
+            dropZone.style.borderColor = '#ddd';
+            dropZone.style.background = '#f8f9fa';
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.style.borderColor = '#ddd';
+            dropZone.style.background = '#f8f9fa';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                previewImage(fileInput);
+            }
+        });
+    </script>
+</body>
+</html>

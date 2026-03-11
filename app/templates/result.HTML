@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>识别结果</title>
+    <link href="{% static 'bootstrap-3.4.1-dist/css/bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="container" style="margin-top: 30px;">
+        <h1 class="text-center" style="margin-bottom: 30px;">日文文本识别结果</h1>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h5 class="panel-title">识别结果</h5>
+            </div>
+            <div class="panel-body">
+                {% if image_url %}
+                <div style="margin-bottom: 20px;">
+                    <h6>上传的图片：</h6>
+                    <img src="{{ image_url }}" class="img-responsive img-rounded" alt="上传的图片">
+                </div>
+                {% endif %}
+                {% if result %}
+                <div style="margin-bottom: 20px;">
+                    <h6>识别结果：</h6>
+                    <p class="border p-3 rounded">{{ result }}</p>
+                </div>
+                {% else %}
+                <p class="text-muted">无识别结果</p>
+                {% endif %}
+                <a href="/" class="btn btn-primary">返回上传页面</a>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'bootstrap-3.4.1-dist/js/bootstrap.min.js' %}"></script>
+</body>
+</html>
